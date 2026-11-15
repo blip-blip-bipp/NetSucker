@@ -9,6 +9,8 @@ dependencies (rumps, pyobjc), so it runs without the venv or system Python.
 """
 from setuptools import setup
 
+VERSION = "2.01"
+
 APP = ["bandwidth_menubar.py"]
 OPTIONS = {
     "argv_emulation": False,
@@ -17,6 +19,8 @@ OPTIONS = {
         "CFBundleName": "NetSucker",
         "CFBundleDisplayName": "NetSucker",
         "CFBundleIdentifier": "com.fab.netsucker",
+        "CFBundleShortVersionString": VERSION,
+        "CFBundleVersion": VERSION,
         "LSUIElement": True,  # menu-bar-only app: no Dock icon, no app menu
         "LSBackgroundOnly": False,
     },
@@ -25,6 +29,7 @@ OPTIONS = {
 setup(
     app=APP,
     name="NetSucker",
+    version=VERSION,
     options={"py2app": OPTIONS},
     setup_requires=["py2app"],
 )
