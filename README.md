@@ -2,7 +2,7 @@
 
 A tiny macOS menu bar app that shows your network traffic — all the time, no clicking required.
 
-<p align="center"><img src="assets/icon_master.png" width="128" alt="NetSucker icon"></p>
+<p align="left"><img src="assets/icon_master.png" width="128" alt="NetSucker icon"></p>
 
 ## What it does
 
