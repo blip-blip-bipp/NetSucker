@@ -12,6 +12,7 @@ from setuptools import setup
 APP = ["bandwidth_menubar.py"]
 OPTIONS = {
     "argv_emulation": False,
+    "iconfile": "assets/icon.icns",
     "plist": {
         "CFBundleName": "NetSucker",
         "CFBundleDisplayName": "NetSucker",
