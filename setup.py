@@ -9,7 +9,7 @@ dependencies (rumps, pyobjc), so it runs without the venv or system Python.
 """
 from setuptools import setup
 
-VERSION = "2.01"
+VERSION = "2.02"
 
 APP = ["bandwidth_menubar.py"]
 OPTIONS = {
