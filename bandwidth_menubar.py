@@ -28,10 +28,16 @@ holds the default route, which is the same technique standalone meter
 apps use and needs no elevated privileges.
 """
 
+import os
 import subprocess
 import re
+import sys
 import time
 import rumps
+
+APP_NAME = "NetSucker"
+PREFS_DIR = os.path.expanduser(f"~/Library/Application Support/{APP_NAME}")
+LOGIN_ITEM_ASKED_FLAG = os.path.join(PREFS_DIR, "asked_login_item")
 
 REFRESH_SECONDS = 3   # how often to poll
 TOP_N = 5             # how many apps to show
@@ -226,6 +232,17 @@ class BandwidthApp(rumps.App):
         self.timer = rumps.Timer(self.refresh, REFRESH_SECONDS)
         self.timer.start()
 
+        # NSAlert needs the Cocoa run loop already going to behave as a real
+        # modal (otherwise it resolves instantly with no chance to click
+        # anything), so fire it shortly after .run() has started instead of
+        # before it.
+        self.login_prompt_timer = rumps.Timer(self._show_login_prompt_once, 1)
+        self.login_prompt_timer.start()
+
+    def _show_login_prompt_once(self, _):
+        self.login_prompt_timer.stop()
+        maybe_prompt_for_login_item()
+
     def _meter_title(self, now):
         """↓/↑ total-traffic meter for the menu bar title, from interface counters."""
         iface = default_interface()
@@ -304,6 +321,58 @@ class BandwidthApp(rumps.App):
             self.menu.add(_menu_line(f"{name}: {kbps:.0f} KB/s  (↓{down:.0f} ↑{up:.0f})"))
         self.menu.add(rumps.separator)
         self.menu.add(_menu_line(f"refreshing every {REFRESH_SECONDS}s"))
+
+
+def running_as_bundled_app():
+    """True when running as the packaged .app (py2app sets sys.frozen), not `python3 bandwidth_menubar.py`."""
+    return getattr(sys, "frozen", None) == "macosx_app"
+
+
+def app_bundle_path():
+    """Filesystem path to the running .app bundle, or None if not bundled."""
+    try:
+        from Foundation import NSBundle
+        return NSBundle.mainBundle().bundlePath()
+    except Exception:
+        return None
+
+
+def add_to_login_items(app_path):
+    script = (
+        'tell application "System Events" to make login item at end '
+        f'with properties {{path:"{app_path}", hidden:false, name:"{APP_NAME}"}}'
+    )
+    try:
+        subprocess.run(["osascript", "-e", script], check=True, timeout=10)
+        return True
+    except Exception:
+        return False
+
+
+def maybe_prompt_for_login_item():
+    """On the very first launch of the packaged app, ask once whether to start at login."""
+    if os.path.exists(LOGIN_ITEM_ASKED_FLAG):
+        return
+    try:
+        os.makedirs(PREFS_DIR, exist_ok=True)
+        open(LOGIN_ITEM_ASKED_FLAG, "w").close()
+    except Exception:
+        pass
+
+    if not running_as_bundled_app():
+        return
+    app_path = app_bundle_path()
+    if not app_path:
+        return
+
+    response = rumps.alert(
+        title=f"Launch {APP_NAME} at login?",
+        message=f"{APP_NAME} can start automatically every time you log in.",
+        ok="Add to Login Items",
+        cancel="Not Now",
+    )
+    if response == 1:
+        add_to_login_items(app_path)
 
 
 if __name__ == "__main__":

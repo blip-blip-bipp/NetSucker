@@ -2,7 +2,7 @@
 
 A tiny macOS menu bar app that shows your network traffic — all the time, no clicking required.
 
-![icon](assets/icon_master.png)
+<p align="center"><img src="assets/icon_master.png" width="128" alt="NetSucker icon"></p>
 
 ## What it does
 
@@ -18,7 +18,7 @@ Download `NetSucker.app` from the [Releases](../../releases) page, drag it into 
 
 Since it isn't notarized/signed, the first launch needs a right-click → **Open** (or `xattr -dr com.apple.quarantine /Applications/NetSucker.app`) to get past Gatekeeper.
 
-To have it launch automatically at login, add it in **System Settings → General → Login Items**.
+On first launch it'll ask whether to start automatically at login; you can change that later in **System Settings → General → Login Items**.
 
 ## Run from source
 
